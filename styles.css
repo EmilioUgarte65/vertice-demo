@@ -26,8 +26,8 @@
   --yellow:        #F59E0B;
 
   --text-primary:   #F9FAFB;
-  --text-secondary: #9CA3AF;
-  --text-muted:     #6B7280;
+  --text-secondary: #A6AFBE;
+  --text-muted:     #828BA0;
   --text-dark:      #111827;
 
   --card-radius:   16px;
@@ -1937,3 +1937,34 @@ a { text-decoration: none; color: inherit; }
 .sk-bar  { height: 6px; width: 100%; border-radius: 3px; }
 .sk-circle      { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; }
 .sk-circle.sm   { width: 32px; height: 32px; }
+
+/* ============================================================
+   PULIDO UX (ui-ux-pro-max) — accesibilidad e interacción
+   ============================================================ */
+/* Foco visible para teclado (checklist de la skill) */
+:focus-visible {
+  outline: 2px solid var(--blue-light);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+button:focus-visible, .nav-item:focus-visible, .project-card:focus-visible,
+.btn-action:focus-visible, .qs-card:focus-visible {
+  outline: 2px solid var(--blue-light);
+  outline-offset: 3px;
+}
+/* Selección de texto con el acento de marca */
+::selection { background: rgba(255,107,53,0.28); color: #fff; }
+/* Inputs: anillo de foco claro y accesible */
+input:focus, select:focus, textarea:focus {
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.25);
+  border-radius: 12px;
+}
+/* Respeta "reducir movimiento" */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
