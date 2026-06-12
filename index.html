@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- DEMO: capa de datos en memoria (antes que cualquier módulo) -->
+  <script src="demo-mock.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0A0E1A" />
+  <meta name="description" content="Vértice — Sistema de gestión de presupuesto y pagos para construcción (demo, datos de ejemplo)" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Vértice" />
+  <title>Vértice | Gestión de Obras</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%233B82F6'/%3E%3Ctext x='50' y='70' font-size='62' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'%3EV%3C/text%3E%3C/svg%3E" />
+</head>
+
+<body>
+  <div id="toast-container"></div>
+
+  <!-- ============================================================ -->
+  <!-- LOGIN SCREEN                                                  -->
+  <!-- ============================================================ -->
+  <div id="login-screen" class="login-screen hidden">
+    <div class="login-bg-deco"></div>
+    <div class="login-card">
+      <div class="login-logo-wrapper flex-column-center" style="margin-bottom: 20px;">
+        <div class="login-logo-img" style="display:flex;align-items:center;justify-content:center;font-weight:900;font-size:30px;letter-spacing:-0.03em;color:#fff">Vértice</div>
+        <p class="text-small-spaced">SISTEMA DE GESTIÓN</p>
+      </div>
+
+      <h2 class="login-title">Bienvenido</h2>
+      <p class="login-subtitle">Ingresa tus credenciales para continuar</p>
+
+      <form id="login-form" novalidate>
+        <div class="form-group">
+          <label class="form-label">Correo Electrónico</label>
+          <div class="login-input-wrapper">
+            <svg class="login-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+              <polyline points="22,6 12,13 2,6" />
+            </svg>
+            <input type="email" class="form-input login-input" id="login-email" autocomplete="username"
+              placeholder="usuario@empresa.com" autocomplete="email" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Contraseña</label>
+          <div class="login-input-wrapper">
+            <svg class="login-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <input type="password" class="form-input login-input" id="login-password" placeholder="••••••••"
+              autocomplete="current-password" />
+          </div>
+        </div>
+
+        <p class="login-error" id="login-error" style="display:none"></p>
+
+        <button type="submit" class="btn-submit" id="btn-login">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+            <polyline points="10 17 15 12 10 7" />
+            <line x1="15" y1="12" x2="3" y2="12" />
+          </svg>
+          Iniciar Sesión
+        </button>
+      </form>
+
+      <p class="login-footer">Vértice v2.1.0 &mdash; Sistema seguro</p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SPLASH SCREEN                                                 -->
+  <!-- ============================================================ -->
+  <div id="splash-screen" class="splash-screen">
+    <div class="splash-content">
+      <div class="splash-logo flex-column-center">
+        <div class="splash-logo-img" style="display:flex;align-items:center;justify-content:center;font-weight:900;font-size:38px;letter-spacing:-0.03em;color:#fff">Vértice</div>
+      </div>
+      <p class="splash-subtitle">Gestión de Obras y Pagos</p>
+      <div class="splash-loader">
+        <div class="loader-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- APP SHELL                                                     -->
+  <!-- ============================================================ -->
+  <div id="app" class="app hidden">
+
+    <!-- ============================================================ -->
+    <!-- HEADER                                                        -->
+    <!-- ============================================================ -->
+    <header class="app-header" id="app-header">
+      <div class="header-content">
+        <div class="header-left">
+          <div class="logo-small flex-center">
+            <span class="header-logo-img" style="display:inline-flex;align-items:center;font-weight:800;font-size:18px;letter-spacing:-0.02em;color:#fff">Vértice</span>
+          </div>
+          <span class="header-title" id="header-title">Cargando...</span>
+        </div>
+        <div class="header-right">
+          <button class="icon-btn" id="btn-notifications" aria-label="Notificaciones">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            <span class="badge" id="notif-badge" style="display:none">0</span>
+          </button>
+          <div class="avatar" id="user-avatar">
+            <span id="avatar-initials">AD</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============================================================ -->
+    <!-- MAIN CONTENT AREA                                             -->
+    <!-- ============================================================ -->
+    <main class="main-content" id="main-content">
+
+      <!-- ============================================================ -->
+      <!-- SCREEN 1: DASHBOARD                                           -->
+      <!-- ============================================================ -->
+      <section id="screen-dashboard" class="screen active">
+
+        <!-- Provider Dashboard Hero (hidden for admin) -->
+        <div id="provider-dashboard-hero" class="provider-hero-banner hidden">
+          <div class="phb-bg-deco"></div>
+          <div class="phb-greeting">
+            <p class="greeting-text">Hola, <span id="provider-name-display">Proveedor</span> 👋</p>
+            <p class="greeting-date" id="provider-current-date"></p>
+          </div>
+          <div class="phb-stats">
+            <div class="phb-stat-card">
+              <p class="phb-stat-label">MIS GANANCIAS</p>
+              <p class="phb-stat-value" id="provider-earnings">$ 0.00</p>
+              <div class="phb-stat-trend">Total presupuestos proveedores aprobadas</div>
+            </div>
+            <div class="phb-stat-divider"></div>
+            <div class="phb-stat-card">
+              <p class="phb-stat-label">PAGOS RECIBIDOS</p>
+              <p class="phb-stat-value" id="provider-paid-total">$ 0.00</p>
+              <div class="phb-stat-trend">Total aprobado</div>
+            </div>
+          </div>
+          <!-- Payment window status -->
+          <div id="phb-window-status" class="phb-window-open" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <span id="phb-window-text">Ventana de pagos abierta</span>
+          </div>
+        </div>
+
+        <!-- Financial Summary Banner -->
+        <div class="financial-banner">
+          <div class="banner-bg-decoration"></div>
+          <div class="banner-greeting">
+            <p class="greeting-text">Buenos días, <span id="user-name-display">Admin</span> 👋</p>
+            <p class="greeting-date" id="current-date"></p>
+          </div>
+          <div class="financial-stats">
+            <div class="stat-card-banner">
+              <p class="stat-label-banner">COSTO DIRECTO</p>
+              <p class="stat-value-banner" id="total-investment">$ 0.00</p>
+              <div class="stat-trend">
+                <span>—</span>
+              </div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-card-banner">
+              <p class="stat-label-banner">SALDO DISPONIBLE</p>
+              <p class="stat-value-banner" id="total-profits">$ 0.00</p>
+              <div class="stat-trend">
+                <span>—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Stats Row -->
+        <div class="quick-stats-row">
+          <div class="qs-card">
+            <div class="qs-icon orange">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+              </svg>
+            </div>
+            <div>
+              <p class="qs-value" id="active-projects-count">0</p>
+              <p class="qs-label">Proyectos</p>
+            </div>
+          </div>
+          <div class="qs-card">
+            <div class="qs-icon blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            </div>
+            <div>
+              <p class="qs-value" id="pending-requests-count">0</p>
+              <p class="qs-label">Solicitudes</p>
+            </div>
+          </div>
+          <div class="qs-card">
+            <div class="qs-icon green">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <div>
+              <p class="qs-value" id="paid-count">0</p>
+              <p class="qs-label">Pagados</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Header -->
+        <div class="section-header">
+          <h2 class="section-title">Proyectos Activos</h2>
+          <div class="quick-actions">
+            <button class="btn-action btn-secondary" id="btn-new-user" data-modal-open="modal-new-user">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+                <line x1="18" y1="11" x2="18" y2="17" />
+                <line x1="15" y1="14" x2="21" y2="14" />
+              </svg>
+              Nuevo Usuario
+            </button>
+            <button class="btn-action btn-primary" id="btn-new-project" data-modal-open="modal-new-project">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Nuevo Proyecto
+            </button>
+            <button class="btn-action btn-orange" id="btn-solicitar-pago" style="display:none">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+              Solicitar Pago
+            </button>
+          </div>
+        </div>
+
+        <!-- Payment Window Alert (Provider Only) -->
+        <div id="payment-window-alert" class="alert-box warning hidden">
+          <div class="alert-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <div class="alert-text">
+            <strong>Ventana de pagos cerrada:</strong> Las solicitudes se abren los lunes a las 9:00 AM y cierran los
+            jueves a las 6:00 PM.
+          </div>
+        </div>
+
+        <!-- Projects Grid -->
+        <div class="projects-grid" id="projects-grid">
+          <!-- Populated by JS -->
+        </div>
+
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- SCREEN 2: PROJECTS LIST                                       -->
+      <!-- ============================================================ -->
+      <section id="screen-projects" class="screen">
+        <div class="screen-search">
+          <div class="search-box">
+            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input type="text" placeholder="Buscar proyectos..." id="search-projects" />
+          </div>
+          <button class="filter-btn" id="btn-toggle-filter-projects">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="4" y1="6" x2="20" y2="6" />
+              <line x1="8" y1="12" x2="16" y2="12" />
+              <line x1="11" y1="18" x2="13" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <div id="projects-list-admin-btn" style="padding:0 16px 8px;display:none">
+          <button class="btn-submit" data-modal-open="modal-new-project">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Nuevo Proyecto
+          </button>
+        </div>
+        <div class="projects-list-full" id="projects-list-full">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- SCREEN 3: PROJECT DETAIL                                      -->
+      <!-- ============================================================ -->
+      <section id="screen-project-detail" class="screen">
+        <div class="detail-header">
+          <button class="back-btn" data-action="back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <div class="detail-header-info">
+            <h2 id="detail-project-name">...</h2>
+            <span class="detail-status" id="detail-status">—</span>
+          </div>
+          <button class="icon-btn" id="btn-edit-project">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="1" />
+              <circle cx="19" cy="12" r="1" />
+              <circle cx="5" cy="12" r="1" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Provider Financial Summary Card -->
+        <div class="provider-summary-card">
+          <div class="provider-summary-row">
+            <div class="provider-stat">
+              <p class="ps-label">Costo Directo</p>
+              <p class="ps-value green" id="detail-budget">$ 0.00</p>
+            </div>
+            <div class="ps-divider"></div>
+            <div class="provider-stat">
+              <p class="ps-label">Total Pagado</p>
+              <p class="ps-value orange" id="detail-paid">$ 0.00</p>
+            </div>
+            <div class="ps-divider"></div>
+            <div class="provider-stat">
+              <p class="ps-label">Saldo Disponible</p>
+              <p class="ps-value blue" id="detail-balance">$ 0.00</p>
+            </div>
+          </div>
+          <div class="provider-progress">
+            <div class="pp-bar-bg">
+              <div class="pp-bar-fill" id="detail-progress-bar" style="width: 0%"></div>
+            </div>
+            <span class="pp-percent" id="detail-percent">0% utilizado</span>
+          </div>
+        </div>
+
+        <!-- Detail Tabs -->
+        <div class="detail-tabs">
+          <button class="tab-btn active" id="tab-quotes" data-tab="quotes">Presupuestos Proveedores</button>
+          <button class="tab-btn" id="tab-payments" data-tab="payments">Pagos</button>
+          <button class="tab-btn" id="tab-providers" data-tab="providers">Proveedores</button>
+        </div>
+
+        <!-- Tab: Presupuestos Proveedores -->
+        <div id="tab-content-quotes" class="tab-content">
+          <button class="btn-submit" id="btn-new-quote" style="display:none;margin-bottom:16px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Nueva Presupuesto Proveedor
+          </button>
+          <div class="quotes-list" id="quotes-list"><!-- Populated by JS --></div>
+        </div>
+
+        <!-- Tab: Solicitudes de Pago -->
+        <div id="tab-content-payments" class="tab-content hidden">
+          <div class="payments-list" id="payments-list"><!-- Populated by JS --></div>
+        </div>
+
+        <!-- Tab: Proveedores -->
+        <div id="tab-content-providers" class="tab-content hidden">
+          <div id="providers-list"><!-- Populated by JS --></div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- SCREEN 4: NOTIFICATIONS                                       -->
+      <!-- ============================================================ -->
+      <section id="screen-notifications" class="screen">
+        <div class="notifications-header">
+          <h2>Notificaciones</h2>
+          <div style="display:flex;gap:12px">
+            <button class="text-btn" id="btn-mark-all-read">Marcar todo leído</button>
+            <button class="text-btn" style="color:#ef4444" id="btn-clear-notifs">Limpiar historial</button>
+          </div>
+        </div>
+        <div class="notifications-list" id="notifications-list">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- SCREEN 5: SOLICITUDES (Panel de Aprobación / Provider view)  -->
+      <!-- ============================================================ -->
+      <section id="screen-solicitudes" class="screen">
+
+        <!-- Admin view -->
+        <div id="solicitudes-admin-view" class="hidden">
+          <div class="sol-counters">
+            <div class="sol-counter pending">
+              <div class="sol-counter-num" id="sol-count-pending">0</div>
+              <div class="sol-counter-label">Pendientes</div>
+            </div>
+            <div class="sol-counter approved">
+              <div class="sol-counter-num" id="sol-count-approved">0</div>
+              <div class="sol-counter-label">Aprobadas</div>
+            </div>
+            <div class="sol-counter rejected">
+              <div class="sol-counter-num" id="sol-count-rejected">0</div>
+              <div class="sol-counter-label">Rechazadas</div>
+            </div>
+          </div>
+          <div class="sol-tabs">
+            <button class="sol-tab active" id="sol-tab-pending" data-filter="PENDING">Pendientes (<span
+                id="sol-tab-count-pending">0</span>)</button>
+            <button class="sol-tab" id="sol-tab-approved" data-filter="APPROVED">Aprobadas (<span
+                id="sol-tab-count-approved">0</span>)</button>
+            <button class="sol-tab" id="sol-tab-rejected" data-filter="REJECTED">Rechazadas (<span
+                id="sol-tab-count-rejected">0</span>)</button>
+          </div>
+          <div id="solicitudes-list" class="sol-list"></div>
+        </div>
+
+        <!-- Provider view -->
+        <div id="solicitudes-provider-view" class="hidden">
+          <button class="btn-submit" id="btn-solicitar-pago-list" data-nav="payment-form" style="margin-bottom:16px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Nueva Solicitud de Pago
+          </button>
+          <!-- FIX #7: Tabs de filtro por estado para proveedor -->
+          <div class="sol-tabs" style="margin-bottom:12px">
+            <button class="sol-tab active" id="prov-sol-tab-all" data-prov-sol-filter="ALL"
+              data-status="ALL">Todas</button>
+            <button class="sol-tab" id="prov-sol-tab-pending" data-prov-sol-filter="PENDING"
+              data-status="PENDING">Pendientes</button>
+            <button class="sol-tab" id="prov-sol-tab-approved" data-prov-sol-filter="APPROVED"
+              data-status="APPROVED">Aprobadas</button>
+            <button class="sol-tab" id="prov-sol-tab-rejected" data-prov-sol-filter="REJECTED"
+              data-status="REJECTED">Rechazadas</button>
+          </div>
+          <!-- Hidden anchor to track active tab for the render function -->
+          <span id="prov-sol-active-tab" data-status="ALL" style="display:none"></span>
+          <div id="solicitudes-provider-list" class="sol-list"></div>
+        </div>
+
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- SCREEN 6: PR DETAIL (Revisión de Solicitud de Pago)          -->
+      <!-- ============================================================ -->
+      <section id="screen-pr-detail" class="screen">
+        <div class="detail-header">
+          <button class="back-btn" data-action="back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <div class="detail-header-info">
+            <h2 id="prd-id">PR-001</h2>
+            <span class="detail-status" id="prd-status">Pendiente</span>
+          </div>
+          <div></div>
+        </div>
+
+        <div id="prd-content" style="padding:0 16px 100px">
+
+          <!-- Proveedor -->
+          <div class="prd-section">
+            <div class="prd-section-title">Información del Proveedor</div>
+            <div class="prd-info-row"><span class="prd-info-label">Nombre</span><span id="prd-provider-name">—</span>
+            </div>
+            <div class="prd-info-row" id="prd-company-row"><span class="prd-info-label">Empresa</span><span
+                id="prd-provider-company" style="color:var(--primary);font-weight:600">—</span></div>
+            <div class="prd-info-row"><span class="prd-info-label">Email</span><span id="prd-provider-email">—</span>
+            </div>
+            <div class="prd-info-row" id="prd-rfc-row"><span class="prd-info-label">RFC</span><span
+                id="prd-provider-rfc">—</span></div>
+            <div class="prd-info-row"><span class="prd-info-label">Proyecto</span><span id="prd-project">—</span></div>
+            <div class="prd-info-row"><span class="prd-info-label">Presupuesto Proveedor</span><span id="prd-quote-num"
+                style="font-weight:600">—</span></div>
+          </div>
+
+          <!-- Detalles del avance -->
+          <div class="prd-section">
+            <div class="prd-section-title">Detalles del Avance</div>
+            <div class="prd-info-row"><span class="prd-info-label">Concepto</span><span id="prd-concept">—</span></div>
+            <div class="prd-advance-row">
+              <div class="prd-adv-cell">
+                <div class="prd-adv-label">Avance Declarado</div>
+                <div class="prd-adv-value" id="prd-progress">0%</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Partidas incluidas -->
+          <div class="prd-section" id="prd-items-section" style="display:none">
+            <div class="prd-section-title">Partidas de la Solicitud</div>
+            <div id="prd-items-list"></div>
+          </div>
+
+          <!-- Evidencia fotográfica -->
+          <div class="prd-section">
+            <div class="prd-section-title">Evidencia Fotográfica</div>
+            <div id="prd-gallery" class="prd-gallery"></div>
+          </div>
+
+          <!-- Desglose financiero -->
+          <div class="prd-section prd-breakdown">
+            <div class="prd-section-title">Desglose Financiero</div>
+            <div class="prd-breakdown-row"><span>Subtotal</span><span id="prd-subtotal">—</span></div>
+            <div class="prd-breakdown-row"><span>IVA (16%)</span><span id="prd-iva">—</span></div>
+            <div class="prd-breakdown-row prd-breakdown-total"><span>Total Solicitado</span><span id="prd-total"
+                class="orange">—</span></div>
+            <div class="prd-breakdown-row" id="prd-authorized-row" style="display:none">
+              <span style="color:var(--primary);font-weight:700">Total Autorizado</span>
+              <span id="prd-authorized-amount" style="color:var(--primary);font-weight:700">—</span>
+            </div>
+          </div>
+
+          <!-- Acciones (solo Admin + PENDING) -->
+          <div id="prd-actions" class="prd-actions hidden">
+            <button class="btn-reject-full" id="btn-prd-reject">Rechazar</button>
+            <button class="btn-approve-full" id="btn-prd-approve">Aprobar Pago</button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- SCREEN 7: QUOTE PARTIDAS (Drill-down desde presupuesto proveedor)        -->
+      <!-- ============================================================ -->
+      <section id="screen-quote-partidas" class="screen">
+        <div class="detail-header">
+          <button class="back-btn" data-action="back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <div class="detail-header-info">
+            <h2 id="qp-quote-id">Q-001</h2>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:13px;color:var(--text-secondary)" id="qp-provider">Proveedor</span>
+              <span class="status-badge" id="qp-status-badge" style="display:none"></span>
+            </div>
+          </div>
+          <div></div>
+        </div>
+
+        <!-- Resumen financiero de el presupuesto proveedor -->
+        <div class="qp-summary-card">
+          <div class="qp-summary-row">
+            <div class="qp-stat">
+              <div class="qp-stat-label">Presupuesto</div>
+              <div class="qp-stat-value green" id="qp-budget">—</div>
+            </div>
+            <div class="qp-stat-divider"></div>
+            <div class="qp-stat">
+              <div class="qp-stat-label">Pagado</div>
+              <div class="qp-stat-value orange" id="qp-paid">—</div>
+            </div>
+            <div class="qp-stat-divider"></div>
+            <div class="qp-stat">
+              <div class="qp-stat-label">Disponible</div>
+              <div class="qp-stat-value blue" id="qp-available">—</div>
+            </div>
+          </div>
+          <div class="qp-progress-wrap">
+            <div class="qp-progress-bg">
+              <div class="qp-progress-fill" id="qp-progress-bar" style="width:0%"></div>
+            </div>
+            <span class="qp-progress-label" id="qp-progress-pct">0% ejecutado</span>
+          </div>
+        </div>
+
+        <!-- Acciones de presupuesto proveedor (solo Admin + PENDING) -->
+        <div id="qp-quote-actions" class="hidden" style="padding: 0 16px; margin-bottom:12px; display:flex; gap:10px">
+          <button class="btn-reject-full" id="btn-quote-reject">Rechazar Presupuesto Proveedor</button>
+          <button class="btn-approve-full" id="btn-quote-approve">Aprobar Presupuesto Proveedor</button>
+        </div>
+
+        <!-- Agregar partida (solo Admin) -->
+        <div id="qp-add-item-section" style="display:none;padding:0 16px 12px">
+          <button class="btn-submit" id="btn-toggle-add-item"
+            style="width:100%;background:rgba(0,20,137,.12);color:var(--primary);border:1.5px dashed var(--primary)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Agregar Partida
+          </button>
+          <div id="qp-add-item-form"
+            style="display:none;margin-top:12px;background:var(--bg-card-dark);border:1px solid var(--border);border-radius:12px;padding:16px">
+            <div class="form-group">
+              <label class="form-label">Concepto</label>
+              <textarea class="form-input" id="qp-new-concept" rows="2"
+                placeholder="Descripción del trabajo o material..." style="resize:none;font-family:inherit"></textarea>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+              <div class="form-group">
+                <label class="form-label">Unidad</label>
+                <input type="text" class="form-input" id="qp-new-unit" placeholder="m², pza, hr..." />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Cantidad</label>
+                <input type="number" class="form-input" id="qp-new-qty" placeholder="0" min="0" step="any" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Precio Unit.</label>
+                <input type="number" class="form-input" id="qp-new-price" placeholder="0.00" min="0" step="any" />
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:4px">
+              <button type="button" class="btn-submit" id="btn-save-new-item" style="flex:1">Guardar Partida</button>
+              <button type="button" id="btn-cancel-new-item"
+                style="padding:10px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);cursor:pointer">Cancelar</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="qp-partidas-list" style="padding:0 16px 100px"></div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- SCREEN 8: PROFILE                                             -->
+      <!-- ============================================================ -->
+      <section id="screen-profile" class="screen">
+        <div class="profile-hero">
+          <div class="profile-avatar-large">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          </div>
+          <h2 id="profile-name" class="profile-name">Administrador</h2>
+          <span class="profile-role-badge">Administrador</span>
+          <p id="profile-email" class="profile-email">demo@vertice.app</p>
+        </div>
+        <div class="profile-section">
+          <h3 class="profile-section-title">Cuenta</h3>
+          <div class="profile-menu">
+            <button class="profile-menu-item" data-toast="Próximamente...">
+              <div class="pmi-left">
+                <div class="pmi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg></div>
+                <span>Editar Perfil</span>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+            <button class="profile-menu-item" id="btn-open-change-password">
+              <div class="pmi-left">
+                <div class="pmi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg></div>
+                <span>Cambiar Contraseña</span>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+            <button class="profile-menu-item" id="btn-manage-users" data-nav="users">
+              <div class="pmi-left">
+                <div class="pmi-icon orange-bg">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                </div>
+                <span>Gestionar Usuarios</span>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="profile-section">
+          <h3 class="profile-section-title">Sistema</h3>
+          <div class="profile-menu">
+            <button class="profile-menu-item" data-toast="Próximamente...">
+              <div class="pmi-left">
+                <div class="pmi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                      d="M19.07 4.93A10 10 0 0 1 21 12a10 10 0 0 1-2.93 7.07A10 10 0 0 1 12 21a10 10 0 0 1-7.07-2.93A10 10 0 0 1 3 12a10 10 0 0 1 2.93-7.07A10 10 0 0 1 12 3a10 10 0 0 1 7.07 2.93Z" />
+                  </svg></div>
+                <span>Configuración</span>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+            <button class="profile-menu-item danger hidden" id="btn-nuclear-reset">
+              <div class="pmi-left">
+                <div class="pmi-icon orange-bg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="white" stroke-width="2">
+                    <path d="M2 13s2 8 10 8 10-8 10-8M2 3s2 8 10 8 10-8 10-8" />
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                      d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                  </svg></div>
+                <span>Resetear Sistema (Limpieza Total)</span>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+            <button class="profile-menu-item danger" id="btn-logout">
+              <div class="pmi-left">
+                <div class="pmi-icon red-bg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white"
+                    stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg></div>
+                <span>Cerrar Sesión</span>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="profile-version">
+          <p>Vértice v2.1.0 &mdash; Gestión de Obras</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- SCREEN 9: USERS LIST (Admin Only)                             -->
+      <!-- ============================================================ -->
+      <section id="screen-users" class="screen">
+        <div class="detail-header">
+          <button class="back-btn" data-action="back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <div class="detail-header-info">
+            <h2>Gestionar Usuarios</h2>
+            <span style="font-size:12px;color:var(--text-secondary)">Lista de personal y proveedores</span>
+          </div>
+          <div></div>
+        </div>
+
+        <div style="padding:0 16px 8px">
+          <button class="btn-submit" data-modal-open="modal-new-user">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Nuevo Usuario
+          </button>
+        </div>
+
+        <div class="users-list-full" id="users-list-full" style="padding:0 16px 100px">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- SCREEN 6: PAYMENT REQUEST FORM (Provider Role)                -->
+      <!-- ============================================================ -->
+      <section id="screen-payment-form" class="screen">
+        <div class="detail-header">
+          <button class="back-btn" data-action="back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <h2>Solicitud de Pago</h2>
+          <div></div>
+        </div>
+
+        <!-- Closed System Alert -->
+        <div class="alert-banner" id="closed-system-alert" style="display:none">
+          <div class="alert-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <div class="alert-content">
+            <p class="alert-title">Sistema Cerrado</p>
+            <p class="alert-text">La recepción de facturas está cerrada. El sistema reabre el <strong>Lunes a las 9:00 AM</strong> y cierra los <strong>Jueves a las 6:00 PM</strong>.</p>
+          </div>
+        </div>
+
+        <form class="payment-form" id="payment-form" novalidate>
+
+          <!-- ── 1. SELECCIÓN ───────────────────────────────────── -->
+          <div class="pf-section">
+            <div class="form-group">
+              <label class="form-label">Proyecto / Obra</label>
+              <div class="custom-select-wrapper">
+                <select class="form-select" id="payment-project-select">
+                  <option value="">Seleccionar proyecto...</option>
+                </select>
+                <svg class="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </div>
+            </div>
+            <div class="form-group" id="payment-quote-group" style="display:none">
+              <label class="form-label">Presupuesto Proveedor</label>
+              <div class="custom-select-wrapper">
+                <select class="form-select" id="payment-quote-select">
+                  <option value="">Seleccionar presupuesto proveedor...</option>
+                </select>
+                <svg class="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── 2. DATOS AUTOMÁTICOS ───────────────────────────── -->
+          <div id="pf-auto-section" style="display:none">
+            <div class="pf-section-label">Datos de la solicitud</div>
+            <div class="pf-auto-card">
+              <div class="pf-auto-row"><span>Fecha</span><span id="pf-auto-date">—</span></div>
+              <div class="pf-auto-row"><span>Nº Presupuesto Proveedor</span><span id="pf-auto-quote-num"
+                  style="color:var(--primary);font-weight:700">—</span></div>
+              <div class="pf-auto-row"><span>Monto original presupuesto proveedor</span><span id="pf-auto-quote-total"
+                  style="font-weight:600">—</span></div>
+              <div class="pf-auto-row"><span>Total recibido a la fecha</span><span id="pf-auto-received"
+                  style="color:var(--orange);font-weight:600">—</span></div>
+              <div class="pf-auto-row pf-auto-row-highlight"><span>Saldo pendiente</span><span id="pf-auto-pending"
+                  style="color:#22C55E;font-weight:700">—</span></div>
+            </div>
+          </div>
+
+          <!-- ── 3. PARTIDAS ────────────────────────────────────── -->
+          <div id="payment-items-group" style="display:none">
+            <div class="pf-section-label">Partidas de la solicitud</div>
+            <div id="payment-items-list"></div>
+            <div class="pf-items-total">
+              <span>Total Importe</span>
+              <span id="pf-total-importe" style="font-size:18px;font-weight:700;color:var(--primary)">$0.00</span>
+            </div>
+          </div>
+
+          <!-- ── 4. AVANCE + CONCEPTO ───────────────────────────── -->
+          <div id="pf-details-section" style="display:none">
+            <div class="form-group">
+              <label class="form-label">
+                Avance Físico General de Obra
+                <span class="slider-value" id="slider-display">0%</span>
+              </label>
+              <div class="slider-wrapper">
+                <input type="range" class="styled-slider" id="progress-slider" min="0" max="100" value="0" />
+                <div class="slider-track-fill" id="slider-fill" style="width:0%"></div>
+              </div>
+              <div class="slider-labels">
+                <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="payment-concept">Concepto / Descripción General</label>
+              <input type="text" class="form-input" id="payment-concept"
+                placeholder="Descripción del trabajo realizado..." />
+            </div>
+            <!-- Evidencia -->
+            <div class="form-group">
+              <label class="form-label">Evidencia y Documentos</label>
+              <div class="evidence-buttons">
+                <button type="button" class="evidence-btn" id="btn-upload-pdf">
+                  <div class="evidence-icon red"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                      stroke="white" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                    </svg></div>
+                  <span class="evidence-label">Subir PDF</span>
+                  <span class="evidence-sublabel">Factura / Contrato</span>
+                </button>
+                <button type="button" class="evidence-btn" id="btn-open-camera">
+                  <div class="evidence-icon blue"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                      stroke="white" stroke-width="2">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                      <circle cx="12" cy="13" r="4" />
+                    </svg></div>
+                  <span class="evidence-label">Cámara / Scan</span>
+                  <span class="evidence-sublabel">Foto de Avance</span>
+                </button>
+              </div>
+              <div class="uploaded-files" id="uploaded-files"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="payment-notes">Notas Adicionales</label>
+              <textarea class="form-textarea" id="payment-notes" rows="3"
+                placeholder="Observaciones o notas relevantes..."></textarea>
+            </div>
+          </div>
+
+          <!-- Hidden: el monto total se calcula de las partidas -->
+          <input type="hidden" id="payment-amount" value="0" />
+
+          <button type="submit" class="btn-submit" id="btn-submit-payment" style="display:none">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg>
+            Enviar Solicitud
+          </button>
+        </form>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- SCREEN 9: PARTIDA HISTORY (Historial de pagos por partida)   -->
+      <!-- ============================================================ -->
+      <section id="screen-partida-history" class="screen">
+        <div class="detail-header">
+          <button class="back-btn" data-action="back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <div class="detail-header-info">
+            <h2 id="ph-title">Historial de Pagos</h2>
+            <span style="font-size:12px;color:var(--text-secondary)" id="ph-subtitle">Partida</span>
+          </div>
+          <div></div>
+        </div>
+
+        <!-- Summary financiero de la partida -->
+        <div class="qp-summary-card" id="ph-summary-card" style="display:none">
+          <div class="qp-summary-row">
+            <div class="qp-stat">
+              <div class="qp-stat-label">Presupuesto</div>
+              <div class="qp-stat-value green" id="ph-budget">—</div>
+            </div>
+            <div class="qp-stat-divider"></div>
+            <div class="qp-stat">
+              <div class="qp-stat-label">Pagado</div>
+              <div class="qp-stat-value" style="color:#22C55E" id="ph-paid">—</div>
+            </div>
+            <div class="qp-stat-divider"></div>
+            <div class="qp-stat">
+              <div class="qp-stat-label">Disponible</div>
+              <div class="qp-stat-value blue" id="ph-available">—</div>
+            </div>
+          </div>
+          <div class="qp-progress-wrap">
+            <div class="qp-progress-bg">
+              <div class="qp-progress-fill" id="ph-bar" style="width:0%"></div>
+            </div>
+            <span class="qp-progress-label" id="ph-pct">0% ejecutado</span>
+          </div>
+        </div>
+
+        <div id="ph-list" style="padding:0 16px 100px">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- ID Checker Compatibility Elements -->
+      <div id="budget-compatibility" class="hidden">
+        <table>
+          <tbody id="budget-table-body"></tbody>
+        </table>
+        <input id="bi-concept"><input id="bi-unit"><input id="bi-qty"><input id="bi-price">
+        <div id="header-avatar"></div>
+      </div>
+
+    </main>
+
+    <!-- ============================================================ -->
+    <!-- BOTTOM NAVIGATION BAR                                         -->
+    <!-- ============================================================ -->
+    <nav class="bottom-nav" id="bottom-nav">
+      <button class="nav-item active" id="nav-dashboard" data-nav="dashboard">
+        <div class="nav-icon-wrapper">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+          </svg>
+        </div>
+        <span class="nav-label">Dashboard</span>
+      </button>
+      <button class="nav-item" id="nav-projects" data-nav="projects">
+        <div class="nav-icon-wrapper">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+        </div>
+        <span class="nav-label">Proyectos</span>
+      </button>
+      <button class="nav-item" id="nav-solicitudes" data-nav="solicitudes">
+        <div class="nav-icon-wrapper" style="position:relative">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="1" x2="12" y2="23" />
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+          <span class="nav-badge" id="nav-sol-badge" style="display:none">0</span>
+        </div>
+        <span class="nav-label" id="nav-sol-label">Solicitudes</span>
+      </button>
+      <button class="nav-item" id="nav-notifications" data-nav="notifications">
+        <div class="nav-icon-wrapper" style="position:relative">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+          <span class="nav-badge" id="nav-notif-badge" style="display:none">0</span>
+        </div>
+        <span class="nav-label">Alertas</span>
+      </button>
+      <button class="nav-item" id="nav-profile" data-nav="profile">
+        <div class="nav-icon-wrapper">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        </div>
+        <span class="nav-label">Usuario</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODALS                                                        -->
+  <!-- ============================================================ -->
+
+  <!-- Modal: New Project -->
+  <div class="modal-overlay" id="modal-new-project">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h3>Nuevo Proyecto</h3>
+        <button class="modal-close" data-modal-close="modal-new-project">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <form class="modal-body" id="new-project-form" novalidate>
+        <div class="form-group"><label class="form-label" for="new-project-name">Nombre del Proyecto</label><input
+            type="text" class="form-input" id="new-project-name" placeholder="Ej: Torre Residencial Altus" /></div>
+        <div class="form-group"><label class="form-label" for="new-project-type">Tipo de Obra</label>
+          <div class="custom-select-wrapper"><select class="form-select" id="new-project-type">
+              <option value="RESIDENTIAL">Residencial</option>
+              <option value="COMMERCIAL">Comercial</option>
+              <option value="INDUSTRIAL">Industrial</option>
+              <option value="INFRASTRUCTURE">Infraestructura</option>
+            </select><svg class="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9" />
+            </svg></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1"><label class="form-label" for="new-project-budget">Costo Directo</label>
+            <div class="input-prefix-wrapper"><span class="input-prefix">$</span><input type="number"
+                class="form-input prefix-input" id="new-project-budget" placeholder="0" inputmode="decimal" /></div>
+          </div>
+          <div class="form-group flex-1"><label class="form-label" for="new-project-date">Fecha Inicio</label><input
+              type="date" class="form-input" id="new-project-date" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1"><label class="form-label" for="new-project-ip">Ind. Proyecto</label>
+            <div class="input-prefix-wrapper"><span class="input-prefix">$</span><input type="number"
+                class="form-input prefix-input" id="new-project-ip" placeholder="0" inputmode="decimal" /></div>
+          </div>
+          <div class="form-group flex-1"><label class="form-label" for="new-project-io">Ind. Oficina</label>
+            <div class="input-prefix-wrapper"><span class="input-prefix">$</span><input type="number"
+                class="form-input prefix-input" id="new-project-io" placeholder="0" inputmode="decimal" /></div>
+          </div>
+          <div class="form-group flex-1"><label class="form-label" for="new-project-util">Utilidad</label>
+            <div class="input-prefix-wrapper"><span class="input-prefix">$</span><input type="number"
+                class="form-input prefix-input" id="new-project-util" placeholder="0" inputmode="decimal" /></div>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label" for="new-project-location">Ubicación</label><input type="text"
+            class="form-input" id="new-project-location" placeholder="Ciudad, Estado" /></div>
+        <button type="submit" class="btn-submit" id="btn-save-project">Guardar Proyecto</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: New User -->
+  <div class="modal-overlay" id="modal-new-user">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h3>Nuevo Usuario</h3>
+        <button class="modal-close" data-modal-close="modal-new-user">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <form class="modal-body" id="new-user-form" novalidate>
+        <div class="form-row">
+          <div class="form-group flex-1"><label class="form-label" for="new-user-first">Nombre</label><input type="text"
+              class="form-input" id="new-user-first" placeholder="Nombre" /></div>
+          <div class="form-group flex-1"><label class="form-label" for="new-user-last">Apellido</label><input
+              type="text" class="form-input" id="new-user-last" placeholder="Apellido" /></div>
+        </div>
+        <div class="form-group"><label class="form-label" for="new-user-company">Nombre del Proveedor /
+            Empresa</label><input type="text" class="form-input" id="new-user-company"
+            placeholder="Constructora Sánchez S.A. de C.V." /></div>
+        <div class="form-row">
+          <div class="form-group flex-1"><label class="form-label" for="new-user-rfc">RFC <span
+                style="color:var(--text-muted);font-weight:400">(Opcional)</span></label><input type="text"
+              class="form-input" id="new-user-rfc" placeholder="XXX000000XX0" style="text-transform:uppercase"
+              maxlength="13" /></div>
+          <div class="form-group flex-1"><label class="form-label" for="new-user-email">Correo Electrónico</label><input
+              type="email" class="form-input" id="new-user-email" placeholder="usuario@empresa.com" /></div>
+        </div>
+        <div class="form-group"><label class="form-label" for="new-user-role">Rol</label>
+          <div class="custom-select-wrapper"><select class="form-select" id="new-user-role">
+              <option value="ADMIN">Administrador</option>
+              <option value="PROVIDER" selected>Proveedor</option>
+            </select><svg class="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9" />
+            </svg></div>
+        </div>
+        <div class="form-group"><label class="form-label" for="new-user-phone">Teléfono</label><input type="tel"
+            class="form-input" id="new-user-phone" placeholder="+52 55 0000 0000" inputmode="tel" /></div>
+        <div class="form-group"><label class="form-label" for="new-user-address">Dirección</label><input type="text"
+            class="form-input" id="new-user-address" placeholder="Calle, Colonia, Ciudad, C.P." /></div>
+        <button type="submit" class="btn-submit" id="btn-save-user">Crear Usuario</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: New Quote -->
+  <div class="modal-overlay" id="modal-new-quote">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h3>Nueva Presupuesto Proveedor</h3>
+        <button class="modal-close" data-modal-close="modal-new-quote">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Step 1: Selección de método -->
+      <div class="modal-body" id="quote-method-step">
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">Elige cómo deseas crear el presupuesto proveedor
+        </p>
+        <div class="quote-method-card" data-quote-method="digital">
+          <div class="qm-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+            </svg>
+          </div>
+          <div class="qm-info">
+            <div class="qm-title">Generar Digitalmente</div>
+            <div class="qm-desc">Crea un presupuesto proveedor desde cero con un formulario detallado</div>
+            <ul class="qm-bullets">
+              <li>Ingresa información del proveedor</li>
+              <li>Agrega partidas manualmente</li>
+              <li>Cálculo automático de IVA y totales</li>
+            </ul>
+          </div>
+        </div>
+        <div class="quote-method-card" data-quote-method="scan">
+          <div class="qm-icon" style="background:rgba(255,107,53,0.12);color:var(--primary)">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
+          </div>
+          <div class="qm-info">
+            <div class="qm-title">Escanear o Subir Documento</div>
+            <div class="qm-desc">Digitaliza un presupuesto proveedor física o sube un PDF existente</div>
+            <ul class="qm-bullets">
+              <li>Escanea documentos con la cámara</li>
+              <li>Sube archivos PDF o imágenes</li>
+              <li>Adjunta el documento a el presupuesto proveedor</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Formulario digital -->
+      <form class="modal-body hidden" id="quote-form-step" novalidate>
+        <button type="button" class="btn-back-step" id="btn-back-quote-method">← Volver a métodos</button>
+
+        <div class="form-group" style="margin-top:12px">
+          <label class="form-label">ID de Presupuesto Proveedor</label>
+          <input type="text" class="form-input" id="quote-display-id"
+            style="opacity:0.6;background:var(--bg-tertiary)" />
+        </div>
+        <div class="form-group"><label class="form-label" for="quote-desc">Descripción del Proveedor</label><input
+            type="text" class="form-input" id="quote-desc" placeholder="Materiales o servicios..." /></div>
+        <div class="form-group"><label class="form-label" for="quote-rfc">RFC <span
+              style="color:var(--text-muted);font-weight:400">(Opcional)</span></label><input type="text"
+            class="form-input" id="quote-rfc" placeholder="XXX000000XX0" style="text-transform:uppercase" /></div>
+        <div class="form-row">
+          <div class="form-group flex-1"><label class="form-label" for="quote-date">Fecha de Emisión</label><input
+              type="date" class="form-input" id="quote-date" /></div>
+        </div>
+
+        <!-- Partidas -->
+        <div class="quote-items-section">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <h4 style="margin:0;font-size:14px;color:var(--text-secondary)">Partidas de la Presupuesto Proveedor</h4>
+            <button type="button" class="btn-add-item" id="btn-add-quote-row">+ Agregar Fila</button>
+          </div>
+          <div id="quote-items-list-container">
+            <div id="quote-items-rows"></div>
+          </div>
+          <div class="quote-totals-breakdown">
+            <div class="qtb-row"><span>Subtotal</span><span id="quote-subtotal-display">$0.00</span></div>
+            <div class="qtb-row"><span>IVA (16%)</span><span id="quote-iva-display">$0.00</span></div>
+            <div class="qtb-row qtb-total"><span>Total</span><strong id="quote-calc-total">$0.00</strong></div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btn-save-quote">Guardar Presupuesto Proveedor</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Quote Detail (Para ver partidas de un presupuesto proveedor existente) -->
+  <div id="modal-quote-detail" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h3 id="qd-title">Detalle de Presupuesto Proveedor</h3>
+        <button class="modal-close" data-modal-close="modal-quote-detail">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="qd-summary">
+          <div class="qd-item"><strong>Proveedor:</strong> <span id="qd-provider">-</span></div>
+          <div class="qd-item"><strong>Descripción:</strong> <span id="qd-desc">-</span></div>
+          <div class="qd-item"><strong>Fecha:</strong> <span id="qd-date">-</span></div>
+          <div class="qd-item"><strong>Estado:</strong> <span id="qd-status" class="status-badge"></span></div>
+        </div>
+
+        <div class="qd-table-container">
+          <table class="budget-table small-table">
+            <thead>
+              <tr>
+                <th>Concepto</th>
+                <th>Und.</th>
+                <th>Cant.</th>
+                <th>P. Unit</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="qd-items-body"></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4" style="text-align:right;font-weight:700">TOTAL</td>
+                <td id="qd-total" style="font-weight:700;color:var(--primary)">$0.00</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- (modal-new-budget-item eliminado — partidas viven dentro de presupuestos proveedores) -->
+
+  <!-- Modal: Temporary Password — BUG-013 —————————————————————————————— -->
+  <div class="modal-overlay" id="modal-temp-password">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h3>Usuario Creado</h3>
+        <button class="modal-close" data-modal-close="modal-temp-password">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="color:var(--text-secondary);font-size:14px;margin-bottom:16px">
+          El usuario <strong id="tmp-pwd-name"></strong> fue creado. Comparte esta contraseña temporal de forma segura.
+        </p>
+        <div class="form-group">
+          <label class="form-label">Contraseña Temporal</label>
+          <div style="display:flex;gap:8px">
+            <input type="text" class="form-input" id="tmp-pwd-value" readonly
+              style="font-family:monospace;letter-spacing:2px;font-size:16px" />
+            <button type="button" class="btn-action btn-primary" id="btn-copy-temp-pwd" style="min-width:80px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+              Copiar
+            </button>
+          </div>
+        </div>
+        <p style="color:var(--warning,#f59e0b);font-size:12px;margin-top:8px">
+          ⚠️ Esta contraseña no se mostrará de nuevo. Guárdala ahora.
+        </p>
+        <button type="button" class="btn-submit" data-modal-close="modal-temp-password"
+          style="margin-top:16px">Listo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Confirm Logout — NUEVO-002 ————————————————————————————————— -->
+  <div class="modal-overlay" id="modal-confirm-logout">
+    <div class="modal-sheet" style="max-width:360px">
+      <div class="modal-handle"></div>
+      <div class="modal-body" style="text-align:center;padding:32px 24px">
+        <div
+          style="width:56px;height:56px;border-radius:50%;background:rgba(239,68,68,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+        </div>
+        <h3 style="margin-bottom:8px">Cerrar Sesión</h3>
+        <p style="color:var(--text-secondary);font-size:14px;margin-bottom:24px">¿Estás seguro que deseas cerrar tu
+          sesión?</p>
+        <div style="display:flex;gap:12px">
+          <button class="btn-action btn-secondary btn-close-modal" style="flex:1">Cancelar</button>
+          <button class="btn-action" id="btn-do-logout" style="flex:1;background:#ef4444;color:white">Cerrar
+            Sesión</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Change Password — NUEVO-007 ————————————————————————————————— -->
+  <div class="modal-overlay" id="modal-change-password">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h3>Cambiar Contraseña</h3>
+        <button class="modal-close" data-modal-close="modal-change-password">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <form class="modal-body" id="form-change-password" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="cp-current">Contraseña Actual</label>
+          <input type="password" class="form-input" id="cp-current" placeholder="••••••••"
+            autocomplete="current-password" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cp-new">Nueva Contraseña</label>
+          <input type="password" class="form-input" id="cp-new" placeholder="Mínimo 8 caracteres"
+            autocomplete="new-password" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cp-confirm">Confirmar Nueva Contraseña</label>
+          <input type="password" class="form-input" id="cp-confirm" placeholder="••••••••"
+            autocomplete="new-password" />
+        </div>
+        <button type="submit" class="btn-submit" id="btn-change-password">Actualizar Contraseña</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Reject PR Reason -->
+  <div class="modal-overlay" id="modal-reject-pr">
+    <div class="modal-sheet" style="max-width:400px">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h3>Rechazar Solicitud</h3>
+        <button class="modal-close" data-modal-close="modal-reject-pr">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="prd-reject-id" />
+        <div class="form-group">
+          <label class="form-label" for="reject-reason-input">Motivo del Rechazo <span
+              style="color:var(--text-muted);font-weight:400">(Opcional)</span></label>
+          <textarea class="form-textarea" id="reject-reason-input" rows="3"
+            placeholder="Explica el motivo para que el proveedor pueda corregir..."></textarea>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:8px">
+          <button class="btn-action btn-secondary" style="flex:1" data-modal-close="modal-reject-pr">Cancelar</button>
+          <button class="btn-action" style="flex:1;background:#ef4444;color:white" id="btn-confirm-reject-pr">Confirmar
+            Rechazo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden file input -->
+  <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none" />
+  <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" />
+
+  <!-- Nuclear Cache Buster -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (let registration of registrations) { registration.unregister(); }
+      });
+    }
+    // Force reload ignoring cache if we detect we're on an old version
+    if (!localStorage.getItem('croiva_v3.0_purged')) {
+      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+      navigator.serviceWorker?.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+      localStorage.clear();
+      localStorage.setItem('croiva_v3.0_purged', 'true');
+      window.location.reload(true);
+    }
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script type="module" src="src/main.js?v=3.0.0"></script>
+</body>
+
+</html>

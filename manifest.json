@@ -1,0 +1,20 @@
+{
+  "name": "Vértice — Gestión de Obras",
+  "short_name": "Vértice",
+  "description": "Sistema de Gestión de Presupuesto y Pagos para Construcción",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A0E1A",
+  "theme_color": "#0A0E1A",
+  "lang": "es-MX",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "categories": ["business", "finance", "productivity"],
+  "shortcuts": [
+    { "name": "Nuevo Proyecto", "short_name": "Proyecto", "url": "/?screen=projects", "description": "Crear un nuevo proyecto de obra" },
+    { "name": "Solicitud de Pago", "short_name": "Pago", "url": "/?screen=payment-form", "description": "Enviar una solicitud de pago" }
+  ]
+}
