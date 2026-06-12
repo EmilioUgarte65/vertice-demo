@@ -17,6 +17,9 @@
   --orange:        #FF512F;
   --orange-light:  #F09819;
   --orange-glow:   rgba(255,81,47,0.3);
+  /* Alias de marca (muchos componentes usan var(--primary)) */
+  --primary:       #FF6A3D;
+  --primary-light: #FF9A5C;
   --blue:          #3B82F6;
   --blue-light:    #60A5FA;
   --blue-glow:     rgba(59,130,246,0.3);
@@ -2003,3 +2006,68 @@ input:focus, select:focus, textarea:focus {
   max-width: 920px;
 }
 .projects-list-full .pli-card { width: 100%; }
+
+/* ============================================================
+   PASE PREMIUM (ui-ux-pro-max · Dark OLED) — "bonito"
+   ============================================================ */
+/* Profundidad: malla de luz sutil sobre el fondo profundo */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(58% 48% at 90% -10%, rgba(255,81,47,0.10), transparent 60%),
+    radial-gradient(50% 45% at -6% 6%, rgba(59,130,246,0.08), transparent 60%),
+    radial-gradient(46% 50% at 50% 116%, rgba(124,92,255,0.06), transparent 62%);
+}
+.app, .splash-screen, .login-screen { position: relative; z-index: 1; }
+
+/* Superficies de tarjeta: degradado sutil + brillo superior + borde fino */
+.project-card, .project-list-item, .qs-card, .provider-summary-card,
+.sol-card, .notif-card {
+  background: linear-gradient(180deg, #131c2e 0%, #0f1626 100%);
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 30px rgba(0,0,0,0.35);
+}
+.project-card:hover, .project-list-item:hover, .qs-card:hover,
+.sol-card:hover, .notif-card:hover {
+  border-color: rgba(255,255,255,0.14);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 16px 40px rgba(0,0,0,0.5);
+}
+
+/* Filas de proyecto: más aire + acento izquierdo al pasar el cursor */
+.project-list-item {
+  position: relative; padding: 18px; border-radius: 16px;
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.project-list-item::before {
+  content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px;
+  border-radius: 0 3px 3px 0; background: linear-gradient(180deg, var(--orange), var(--orange-light));
+  opacity: 0; transition: opacity .2s ease;
+}
+.project-list-item:hover { transform: translateY(-2px); }
+.project-list-item:hover::before { opacity: 1; }
+
+/* Iconos de proyecto en la lista: más presencia */
+.pli-icon { width: 46px; height: 46px; border-radius: 13px; box-shadow: 0 6px 16px rgba(0,0,0,0.35); }
+.pli-budget { font-size: 16px; letter-spacing: -0.3px; }
+
+/* Fix: barra de progreso con track oscuro (estaba en blanco #F0F0F0) */
+.pc-progress-bar { background: rgba(255,255,255,0.08); }
+
+/* Icono de infraestructura (faltaba el degradado) */
+.pc-icon.infrastructure, .pli-icon.infrastructure { background: linear-gradient(135deg, #10B981, #34D399); }
+
+/* Botones de acción: micro-interacción consistente */
+.btn-action { transition: transform .12s ease, box-shadow .2s ease, background .2s ease, filter .2s ease; }
+.btn-action:not(:disabled):active { transform: translateY(1px); }
+.btn-action.btn-primary:hover { filter: brightness(1.05); }
+
+/* Sidebar (desktop): item activo más elegante */
+@media (min-width: 768px) {
+  .nav-item.active {
+    background: linear-gradient(135deg, rgba(255,81,47,0.16), rgba(255,154,92,0.05));
+    box-shadow: inset 0 0 0 1px rgba(255,81,47,0.28);
+  }
+}
+
+/* Contador de sección y banner 24/7: un poco más finos */
+.projects-24h-banner { border-radius: 14px; }
