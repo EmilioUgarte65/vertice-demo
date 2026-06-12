@@ -67,10 +67,10 @@
 
   // ── Proyectos (con cotizaciones embebidas para el % de avance) ──
   const projects = [
-    { id: 1, name: "Torre Residencial Aurora", type: "residential", description: "Edificio habitacional de 12 niveles", budget: 8500000, spent: 5200000, createdAt: daysAgo(110) },
-    { id: 2, name: "Plaza Comercial Norte", type: "commercial", description: "Centro comercial con 40 locales", budget: 14200000, spent: 9800000, createdAt: daysAgo(95) },
-    { id: 3, name: "Nave Industrial Sur", type: "industrial", description: "Bodega y planta de 6,000 m²", budget: 6200000, spent: 2100000, createdAt: daysAgo(40) },
-    { id: 4, name: "Puente Vehicular Oriente", type: "infrastructure", description: "Paso vehicular de 180 m", budget: 4800000, spent: 3050000, createdAt: daysAgo(70) },
+    { id: 1, name: "Torre Residencial Aurora", type: "residential", location: "Zona Centro", description: "Edificio habitacional de 12 niveles", budget: 8500000, spent: 5200000, createdAt: daysAgo(110) },
+    { id: 2, name: "Plaza Comercial Norte", type: "commercial", location: "Zona Norte", description: "Centro comercial con 40 locales", budget: 14200000, spent: 9800000, createdAt: daysAgo(95) },
+    { id: 3, name: "Nave Industrial Sur", type: "industrial", location: "Parque Industrial Sur", description: "Bodega y planta de 6,000 m²", budget: 6200000, spent: 2100000, createdAt: daysAgo(40) },
+    { id: 4, name: "Puente Vehicular Oriente", type: "infrastructure", location: "Av. Oriente", description: "Paso vehicular de 180 m", budget: 4800000, spent: 3050000, createdAt: daysAgo(70) },
   ];
   projects.forEach(p => { p.quotes = quotesByProject(p.id); });
   const projectUsers = { 1: [2, 3], 2: [4, 5], 3: [2], 4: [3] };

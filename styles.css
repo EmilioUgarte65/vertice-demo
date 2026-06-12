@@ -1987,8 +1987,19 @@ input:focus, select:focus, textarea:focus {
 /* Quick-stats: el bloque de texto puede encogerse (la cifra no desborda). */
 .qs-card > div { min-width: 0; }
 
-/* Grids sin desborde lateral (minmax(0,…) deja que las columnas se encojan). */
+/* Tarjetas verticales del dashboard: grid responsivo sin desborde. */
 .projects-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (max-width: 480px) { .projects-grid { grid-template-columns: 1fr; } }
-@media (min-width: 768px) { .projects-grid, .projects-list-full { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 1100px) { .projects-grid, .projects-list-full { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 768px) { .projects-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .projects-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* La lista de Proyectos son FILAS horizontales (icono | nombre | presupuesto):
+   debe ser una columna única, no una rejilla (eso metía el contador y el
+   banner como celdas y desalineaba todo). */
+.projects-list-full {
+  display: flex !important;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 920px;
+}
+.projects-list-full .pli-card { width: 100%; }
